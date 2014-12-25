@@ -6,6 +6,13 @@ using System.Collections.Generic;
 public class BlockGenerator : MonoBehaviour{
     
 	static int rowsPerBatch = 6; // Number of rows per batch
+	
+	int delayPerRow = 1; // Number of seconds to delay the movement of each row
+	
+	float fallSpeed = 0.5f;
+	
+	int numBatches = 10; // Number of initial batches to generate
+	int cntBatches = 0;
     
     // Declare an array of rows, an example structue of this array will look like:
 	// [[largeBlock], [smallBlock0, smallBlock1], [smallBlock0, smallBlock1], [largeBlock], [smallBlock0, smallBlock1], [smallBlock0, smallBlock1]]
@@ -23,12 +30,21 @@ public class BlockGenerator : MonoBehaviour{
 	Block[] lb = new Block[1]; // Declare array of size 1
 	Block[] twoSmallBlocks = new Block[2]; // Declare array of size 2
 	
+	List<GameObject> instantiatedBlocks = new List<GameObject>();
+	List<GameObject> blocksToMove = new List<GameObject>();
+	int blockCnt = 0;
+	bool couroutineCalled = false;
+	
 	public void Start(){
 		randy = Random.Range(0, 4);
 	}
 	
 	public void Update(){
-		GenerateBatch();
+		if (cntBatches < numBatches){
+		    GenerateBatch();
+		    cntBatches += 1;
+		}
+		MoveBlocks();
 	}
     
     // Randomly decide the color scheme for the next batch of rows
@@ -116,8 +132,7 @@ public class BlockGenerator : MonoBehaviour{
 			_rows[numRowsGenerated] = twoSmallBlocks;
 			numRowsGenerated += 1; // Increment counter
         }
-        
-        
+        /*
         foreach(Block[] r in _rows){
             if(r.Length == 1){
                 Debug.Log("LARGE BLOCK: " + r[0].blockColor + " | " + r[0].blockPos + " | " + r[0].size);
@@ -125,6 +140,45 @@ public class BlockGenerator : MonoBehaviour{
 				Debug.Log("SMALL BLOCK 0: " + r[0].blockColor + " | " + r[0].blockPos + " | " + r[0].size);
 				Debug.Log("SMALL BLOCK 1: " + r[1].blockColor + " | " + r[1].blockPos + " | " + r[1].size);
 			}
+        }*/
+        
+        // For every row in rows, instantiate the block
+        foreach(Block[] r in _rows){
+			InstantiateBlocks(r);
         }
+        
+		if(couroutineCalled == false){
+		    StartCoroutine("AddBlocksToMoveList");
+		}
+		
+    }
+    // Given an array (of lenth 1 or 2) instantiate blocks accordingly
+    void InstantiateBlocks(Block[] blocks){
+        foreach(Block b in blocks){
+			GameObject block = (GameObject) Instantiate(Resources.Load("TestBlock0", typeof(GameObject)));
+			block.transform.position = b.blockPos;
+			block.renderer.material.color = b.blockColor;
+			block.transform.localScale = new Vector2(block.transform.localScale.x, b.size);
+			instantiatedBlocks.Add(block);
+        }
+    }
+    
+    // After the delay add the next row to the list of blocks to be moved
+    IEnumerator AddBlocksToMoveList(){
+         couroutineCalled = true;
+         while(instantiatedBlocks.Count > 0){
+         	blocksToMove.Add(instantiatedBlocks[blockCnt]);
+			yield return new WaitForSeconds(delayPerRow);
+			blockCnt += 1;
+         }
+    }
+    
+    // Move each element of the list at the fall speed rate
+    void MoveBlocks(){
+		if(blocksToMove.Count > 0){
+		    foreach(GameObject b in blocksToMove){
+				b.transform.position += new Vector3(Time.deltaTime / fallSpeed, 0, 0);
+		    }
+		}
     }
 }
