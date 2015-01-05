@@ -74,7 +74,7 @@ public class BlockGenerator : MonoBehaviour{
 			// Assign associated values to this large block
 			lb[0] = new Block();
 			lb[0].blockPos = Center_pos_preset.transform.position;
-			lb[0].size = 8;
+			lb[0].size = 3;
 
             // Assign the block's color value based on color scheme,
             // then add it to the list of blocks.
@@ -93,11 +93,11 @@ public class BlockGenerator : MonoBehaviour{
 			// Declare 2 small blocks with associated values.
 			Block sb0 = new Block();
 			sb0.blockPos = Left_pos_preset.transform.position;
-			sb0.size = 4;
+			sb0.size = 1;
 			
 			Block sb1 = new Block();
 			sb1.blockPos = Right_pos_preset.transform.position;
-			sb1.size = 4;
+			sb1.size = 1;
 			
 			// Randomly assign opposite block colors to each small block based
 			// on the color scheme, then add them both to the list of blocks.
@@ -159,6 +159,7 @@ public class BlockGenerator : MonoBehaviour{
 			block.transform.position = b.blockPos;
 			block.renderer.material.color = b.blockColor;
 			block.transform.localScale = new Vector2(block.transform.localScale.x, b.size);
+			block.name = "Block";
 			instantiatedBlocks.Add(block);
         }
     }
@@ -177,7 +178,7 @@ public class BlockGenerator : MonoBehaviour{
     void MoveBlocks(){
 		if(blocksToMove.Count > 0){
 		    foreach(GameObject b in blocksToMove){
-				b.transform.position += new Vector3(Time.deltaTime / fallSpeed, 0, 0);
+				b.transform.position -= new Vector3(0, Time.deltaTime / fallSpeed, 0);
 		    }
 		}
     }
