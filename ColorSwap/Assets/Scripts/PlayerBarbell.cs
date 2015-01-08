@@ -44,6 +44,23 @@ public class PlayerBarbell : MonoBehaviour {
 	string debug3;
 
 	GUIStyle style = new GUIStyle();
+
+	bool swapBalls = true; // Have the balls swapped?
+	float ballSwapSpeed = 5.0f;
+	bool ballsSwapping = false; // Are the balls in the middle of the swapping animation?
+	Vector2 tmp_pos0;
+	Vector2 tmp_pos1;
+
+	float degrees0;
+	float speed0 = 2.0f;
+	float amplitude0 = 0.025f;
+	float period0 = 2.0f;
+	
+	float degrees1;
+	float speed1 = 2.0f;
+	float amplitude1 = 0.025f;
+	float period1 = 2.0f;
+
     
 	// Use this for initialization
 	void Start () {
@@ -55,7 +72,10 @@ public class PlayerBarbell : MonoBehaviour {
 		
 		available_shapes.Add("triangle");
 		available_shapes.Add("square");
-		Flick();
+
+		// Temporarily save both ball positions
+		tmp_pos0 = ball0.transform.position;
+		tmp_pos1 = ball1.transform.position;
 	}
 	
 	// Update is called once per frame
@@ -92,13 +112,19 @@ public class PlayerBarbell : MonoBehaviour {
 							    // Check if ray is in bounds of ball0's area
 								if((ray.origin.x < -1.4f && ray.origin.x > -2.8f) &&
 							       (ray.origin.y < -13.5 && ray.origin.y > -14.5f)){
-								    debug3 = "Ball0 tapped";    
-								    Tap ();
+								    //debug3 = "Ball0 tapped";    
+								    if(ballsSwapping == false){
+									    ballsSwapping = true;
+									    StartCoroutine("Tap");
+								    }
 								// Check if ray is in bounds of ball1's area
 							    }else if((ray.origin.x < 2.5f && ray.origin.x > 1.5f) &&
 							             (ray.origin.y < -13.5 && ray.origin.y > -14.5f)){
-									debug3 = "Ball0 tapped";    
-									Tap ();
+									//debug3 = "Ball1 tapped"; 
+								    if(ballsSwapping == false){
+									    ballsSwapping = true;
+								        StartCoroutine("Tap");
+								    }
 							    }
 								break;
 							case TouchPhase.Canceled :
@@ -173,13 +199,79 @@ public class PlayerBarbell : MonoBehaviour {
 	}
 	
 	// Swap the positions of both balls
-	public void Tap(){
-	    // Temporarily save ball 0's position
-	    Vector2 tmp_pos = ball0.transform.position;
-	    // Move ball 0 to ball 1's position
-	    ball0.transform.position = ball1.transform.position;
-	    // Move ball 1 to temp position
-	    ball1.transform.position = tmp_pos;
+	public IEnumerator Tap(){
+		Vector2 ball0_pos = ball0.transform.position;
+		Vector2 ball1_pos = ball1.transform.position;
+
+		// Move ball 0 left to right, curving above barbell
+		// Move ball 1 right to left, curving below barbell
+		if(swapBalls == true){
+			// Move each ball along a cosine curve until they reach the right postion
+			if(ball0.transform.position.x < tmp_pos1.x){
+				ball0_pos.x += Time.deltaTime * speed0;
+				
+				// Update degrees
+				float degreesPerSec = 360.0f / period0;
+				degrees0 = Mathf.Repeat(degrees0 + (Time.deltaTime * degreesPerSec), 360.0f);
+				float radians = degrees0 * Mathf.Deg2Rad;
+				
+				// Offset by sin wave
+				Vector2 offset = new Vector2(0.0f, amplitude0 * Mathf.Sin(radians));
+				ball0.transform.position = new Vector2(ball0_pos.x + offset.x, ball0_pos.y + offset.y);
+				
+				
+				// Move ball 1 along a cosine curve (opposite direction)
+				ball1_pos.x -= Time.deltaTime * speed1;
+				
+				// Update degrees
+				float degreesPerSec1 = 360.0f / period1;
+				degrees1 = Mathf.Repeat(degrees1 + (Time.deltaTime * degreesPerSec1), 360.0f);
+				float radians1 = degrees1 * Mathf.Deg2Rad;
+				
+				// Offset by sin wave
+				Vector2 offset1 = new Vector2(0.0f, amplitude1 * Mathf.Sin(radians1));
+				ball1.transform.position = new Vector2(ball1_pos.x + offset1.x, ball1_pos.y - offset1.y);
+			}else{
+				swapBalls = !swapBalls;
+			}
+
+		// Move ball 0 left to right, curving above barbell
+		// Move ball 1 right to left, curving below barbell
+		}else if(swapBalls == false){
+			// Move ball 0 along a cosine curve
+			if(ball1.transform.position.x > tmp_pos0.x){
+				ball0_pos.x -= Time.deltaTime * speed0;
+				
+				// Update degrees
+				float degreesPerSec = 360.0f / period0;
+				degrees0 = Mathf.Repeat(degrees0 + (Time.deltaTime * degreesPerSec), 360.0f);
+				float radians = degrees0 * Mathf.Deg2Rad;
+				
+				// Offset by sin wave
+				Vector2 offset = new Vector2(0.0f, amplitude0 * Mathf.Sin(radians));
+				ball0.transform.position = new Vector2(ball0_pos.x + offset.x, ball0_pos.y - offset.y);
+				
+				
+				// Move ball 1 along a cosine curve
+				ball1_pos.x += Time.deltaTime * speed1;
+				
+				// Update degrees
+				float degreesPerSec1 = 360.0f / period1;
+				degrees1 = Mathf.Repeat(degrees1 + (Time.deltaTime * degreesPerSec1), 360.0f);
+				float radians1 = degrees1 * Mathf.Deg2Rad;
+				
+				// Offset by sin wave
+				Vector2 offset1 = new Vector2(0.0f, amplitude1 * Mathf.Sin(radians1));
+				ball1.transform.position = new Vector2(ball1_pos.x + offset1.x, ball1_pos.y + offset1.y);
+			}else{
+				swapBalls = !swapBalls;
+			}
+		}
+
+		// Reset boolean switch
+		ballsSwapping = false;
+
+		yield return null;
 	}
 	
 	// Given an RGB value change both ball's color to the given color (occurs durng pinch)
