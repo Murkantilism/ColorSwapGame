@@ -70,7 +70,7 @@ public class BlockGenerator : MonoBehaviour{
 		
         // Randomly decide if this row will be 1 large block or 
         // 2 small blocks and add them to this row array.
-        if(Random.Range(0, 2) == 0){
+        if(Random.Range(0, 3) == 0){  // 25% large block, 75% 2 small blcks
 			// Assign associated values to this large block
 			lb[0] = new Block();
 			lb[0].blockPos = Center_pos_preset.transform.position;
@@ -132,19 +132,14 @@ public class BlockGenerator : MonoBehaviour{
 			_rows[numRowsGenerated] = twoSmallBlocks;
 			numRowsGenerated += 1; // Increment counter
         }
-        /*
-        foreach(Block[] r in _rows){
-            if(r.Length == 1){
-                Debug.Log("LARGE BLOCK: " + r[0].blockColor + " | " + r[0].blockPos + " | " + r[0].size);
-			}else if(r.Length == 2){
-				Debug.Log("SMALL BLOCK 0: " + r[0].blockColor + " | " + r[0].blockPos + " | " + r[0].size);
-				Debug.Log("SMALL BLOCK 1: " + r[1].blockColor + " | " + r[1].blockPos + " | " + r[1].size);
-			}
-        }*/
         
         // For every row in rows, instantiate the block
         foreach(Block[] r in _rows){
-			InstantiateBlocks(r);
+			if(r != null){
+				InstantiateBlocks(r);
+			}else{
+				Debug.LogWarning("Row = null");
+			}
         }
         
 		if(couroutineCalled == false){
@@ -154,14 +149,18 @@ public class BlockGenerator : MonoBehaviour{
     }
     // Given an array (of lenth 1 or 2) instantiate blocks accordingly
     void InstantiateBlocks(Block[] blocks){
-        foreach(Block b in blocks){
-			GameObject block = (GameObject) Instantiate(Resources.Load("TestBlock0", typeof(GameObject)));
-			block.transform.position = b.blockPos;
-			block.renderer.material.color = b.blockColor;
-			block.transform.localScale = new Vector2(block.transform.localScale.x, b.size);
-			block.name = "Block";
-			instantiatedBlocks.Add(block);
-        }
+		if(blocks != null){
+		    foreach(Block b in blocks){
+				GameObject block = (GameObject) Instantiate(Resources.Load("TestBlock0", typeof(GameObject)));
+				block.transform.position = b.blockPos;
+				block.GetComponent<Renderer>().material.color = b.blockColor;
+				block.transform.localScale = new Vector2(block.transform.localScale.x, b.size);
+				block.name = "Block";
+				instantiatedBlocks.Add(block);
+		    }
+		}else{
+			Debug.LogWarning("blocks = null");
+		}
     }
     
     // After the delay add the next row to the list of blocks to be moved

@@ -18,9 +18,7 @@ public class PlayerBarbell : MonoBehaviour {
     // Declare a list of available shapes (always size 2)
 	List<string> available_shapes = new List<string>();
 	
-	int numLives = 3; // Start with 3 lives
-	
-	int score = 0;
+	public ScoreKeeper sk;
 	
 	private float fingerStartTime  = 0.0f;
 	private Vector2 fingerStartPos = Vector2.zero;
@@ -67,8 +65,8 @@ public class PlayerBarbell : MonoBehaviour {
 	    // Set initial ball color
 	    ball0_color = Color.red;
 		ball1_color = Color.blue;
-		ball0.renderer.material.color = ball0_color;
-		ball1.renderer.material.color = ball1_color;
+		ball0.GetComponent<Renderer>().material.color = ball0_color;
+		ball1.GetComponent<Renderer>().material.color = ball1_color;
 		
 		available_shapes.Add("triangle");
 		available_shapes.Add("square");
@@ -276,8 +274,8 @@ public class PlayerBarbell : MonoBehaviour {
 	
 	// Given an RGB value change both ball's color to the given color (occurs durng pinch)
 	public void Pinch(Color rgb){
-	    ball0.renderer.material.color = new Color(rgb.r, rgb.g, rgb.b, rgb.a);
-		ball1.renderer.material.color = new Color(rgb.r, rgb.g, rgb.b, rgb.a);
+	    ball0.GetComponent<Renderer>().material.color = new Color(rgb.r, rgb.g, rgb.b, rgb.a);
+		ball1.GetComponent<Renderer>().material.color = new Color(rgb.r, rgb.g, rgb.b, rgb.a);
 	}
 	
 	// When the player flicks, assign a new shape and color to barbell
@@ -318,12 +316,12 @@ public class PlayerBarbell : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D col){
 	    // When a block collides with this block, check if colors are the same
 		if(col.gameObject.name == "Block"){
-		    if(col.gameObject.renderer.material.color == ball0_color){
-		        //Debug.Log("Ball and Block are same color");
-				numLives -= 1;
+		    if(col.gameObject.GetComponent<Renderer>().material.color == ball0_color){
+		        Debug.Log(gameObject.name + " and Block are same color");
+				sk.SetNumLives(-1);
 		    }else{
-		        //Debug.Log("Ball and Block are different colors");
-		        score += 1;
+		        Debug.Log(gameObject.name + " and Block are different colors");
+				sk.SetScore(1);
 		    }
 			//Debug.Log("Block hit" + col.gameObject.renderer.material.color);
 		}
@@ -331,31 +329,38 @@ public class PlayerBarbell : MonoBehaviour {
 		// When the balls overlap with each other, set ball 0's color to the
 		// combined color, and turn of the render for ball 1.
 		if(col.gameObject.name == "Ball1"){
-			// FIXME: Why don't I just save the color value before changing the color
-			// so I don't have to do opposite color calculations later?
 		    // Combine colors
-		    ball0.renderer.material.color = Color.Lerp(ball0.renderer.material.color, ball1.renderer.material.color, 0.5f);
+		    ball0.GetComponent<Renderer>().material.color = Color.Lerp(ball0.GetComponent<Renderer>().material.color, ball1.GetComponent<Renderer>().material.color, 0.5f);
 			// Hide other ball
-			ball1.renderer.enabled = false;
+			ball1.GetComponent<Renderer>().enabled = false;
 		}
 	}
 	
-	// When the balls no longer overlap with each other, set ball 0's color 
-	// to the opposite of ball 1's color, re-enable ball 1's renderer.
+	// When balls no longer overlap, set the colors back to original and re-enable ball 1's renderer
 	void OnTriggerExit2D(Collider2D col){
+		ball0.GetComponent<Renderer>().material.color = ball0_color;
+		ball1.GetComponent<Renderer>().material.color = ball1_color;
+
+		ball1.GetComponent<Renderer>().enabled = true;
+
+		/*
+		 * 
+		// When the balls no longer overlap with each other, set ball 0's color 
+		// to the opposite of ball 1's color, re-enable ball 1's renderer.
 		if(col.gameObject.name == "Ball1"){
 	        // First calculate the HSV value
-	        Color ball1_hsv = RGBToHSV(ball1.renderer.material.color);
+	        Color ball1_hsv = RGBToHSV(ball1.GetComponent<Renderer>().material.color);
 	        // Then change the hue value to the opposite hue, leave saturation and value (g, b) unchanged
 	        Color opp_ball1_hsv = new Color(360 - ball1_hsv.r, ball1_hsv.g, ball1_hsv.b); // NOTE: R is H aka Hue in this case
 	        // Convert back to RGB
 	        Color opp_ball1_rgb = HSVToRGB(opp_ball1_hsv.r, opp_ball1_hsv.g, opp_ball1_hsv.b);
 	        
 	        // Set ball 0's color to the newly computed opposite color
-	        ball0.renderer.material.color = opp_ball1_rgb;
-	    }
+	        ball0.GetComponent<Renderer>().material.color = opp_ball1_rgb;
+	    }*/
 	}
-	
+
+	#region HELPER METHODS
 	// Helper method to calculate HSV values (to get opposite colors)
 	public Color RGBToHSV(Color RGB){
 	    int max = (int)Mathf.Max(RGB.r, Mathf.Max(RGB.g, RGB.b));
@@ -452,6 +457,7 @@ public class PlayerBarbell : MonoBehaviour {
 			return _color;
 		}
 	}
+	#endregion
 
 	// GUI used for debugging on mobile
 	void OnGUI(){
