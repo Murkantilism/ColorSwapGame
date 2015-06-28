@@ -233,11 +233,11 @@ public class PlayerBarbell : MonoBehaviour {
 				swapBalls = !swapBalls;
 			}
 
-		// Move ball 0 left to right, curving above barbell
-		// Move ball 1 right to left, curving below barbell
+		// Move ball 1 left to right, curving above barbell
+		// Move ball 0 right to left, curving below barbell
 		}else if(swapBalls == false){
 			// Move ball 0 along a cosine curve
-			if(ball1.transform.position.x > tmp_pos0.x){
+			if(ball1.transform.position.x < tmp_pos0.x){
 				ball0_pos.x -= Time.deltaTime * speed0;
 				
 				// Update degrees
@@ -247,7 +247,7 @@ public class PlayerBarbell : MonoBehaviour {
 				
 				// Offset by sin wave
 				Vector2 offset = new Vector2(0.0f, amplitude0 * Mathf.Sin(radians));
-				ball0.transform.position = new Vector2(ball0_pos.x + offset.x, ball0_pos.y - offset.y);
+				ball0.transform.position = new Vector2(ball0_pos.x - offset.x, ball0_pos.y - offset.y);
 				
 				
 				// Move ball 1 along a cosine curve

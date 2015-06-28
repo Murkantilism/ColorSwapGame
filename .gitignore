@@ -5,6 +5,8 @@ Temp/
 Obj/
 UnityGenerated/
 Library/
+Build/
+Mockups/
  
 # ===================================== #
 # Visual Studio / MonoDevelop generated #

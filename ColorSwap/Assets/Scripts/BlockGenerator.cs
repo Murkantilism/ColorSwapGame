@@ -55,7 +55,7 @@ public class BlockGenerator : MonoBehaviour{
         // If we haven't finished generating this batch, don't
         // change the color scheme and call GenerateRow.
 		if(numRowsGenerated < rowsPerBatch){
-		    GenerateRow(randy);
+			GenerateRow(randy);
 		// If we have finished this batch, randomly pick
 		// another color scheme and call GenerateRow.
 		}else{
@@ -81,9 +81,9 @@ public class BlockGenerator : MonoBehaviour{
             if(colorScheme == 0){
 				lb[0].blockColor = Color.Lerp(Color.red, Color.blue, 0.5f); // Purple
             }else if(colorScheme == 1){
-				lb[0].blockColor = Color.Lerp(Color.yellow, Color.green, 0.5f); // Light green
+				lb[0].blockColor = Color.green;
             }else{
-				lb[0].blockColor = Color.Lerp(Color.red, Color.white, 0.5f); // Pink
+				lb[0].blockColor = Color.Lerp(Color.yellow, Color.red, 0.5f); // Orange
             }
             
 			_rows[numRowsGenerated] = lb; // Add this block to list of blocks
@@ -111,19 +111,19 @@ public class BlockGenerator : MonoBehaviour{
 			    }
 			}else if(colorScheme == 1){
 				if(Random.Range(0, 2) == 0){
-					sb0.blockColor = Color.yellow;
-					sb1.blockColor = Color.green;
-				}else{
-					sb0.blockColor = Color.green;
+					sb0.blockColor = Color.blue;
 					sb1.blockColor = Color.yellow;
+				}else{
+					sb0.blockColor = Color.yellow;
+					sb1.blockColor = Color.blue;
 				}
 			}else{
 				if(Random.Range(0, 2) == 0){
-					sb0.blockColor = Color.red;
-					sb1.blockColor = Color.white;
-				}else{
-					sb0.blockColor = Color.white;
+					sb0.blockColor = Color.yellow;
 					sb1.blockColor = Color.red;
+				}else{
+					sb0.blockColor = Color.red;
+					sb1.blockColor = Color.yellow;
 				}
 			}
 			// Add these 2 small blocks to list of small blocks
@@ -151,7 +151,7 @@ public class BlockGenerator : MonoBehaviour{
     void InstantiateBlocks(Block[] blocks){
 		if(blocks != null){
 		    foreach(Block b in blocks){
-				GameObject block = (GameObject) Instantiate(Resources.Load("TestBlock0", typeof(GameObject)));
+				GameObject block = (GameObject) Instantiate(Resources.Load("test_block", typeof(GameObject)));
 				block.transform.position = b.blockPos;
 				block.GetComponent<Renderer>().material.color = b.blockColor;
 				block.transform.localScale = new Vector2(block.transform.localScale.x, b.size);
